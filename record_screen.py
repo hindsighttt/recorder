@@ -6,12 +6,12 @@ import requests, webbrowser
 import argparse
 
 parser = argparse.ArgumentParser(description='Records the screen.')
-parser.add_argument('-LOCATION', type=str, help='Output location of the recording.')
-parser.add_argument('-RECORDING_SECONDS', type=int, help='Length of the recording.')
-parser.add_argument('-X', type=int, help='Width of the screen.')
-parser.add_argument('-Y', type=int, help='Height of the screen.')
-parser.add_argument('-CODEC', type=str, help='Codec of the recording.')
-parser.add_argument('-FRAMERATE', type=float, help='Framerate of the recording.')
+parser.add_argument('--LOCATION', type=str, help='Output location of the recording.')
+parser.add_argument('--RECORDING_SECONDS', type=int, help='Length of the recording.')
+parser.add_argument('--X', type=int, help='Width of the screen.')
+parser.add_argument('--Y', type=int, help='Height of the screen.')
+parser.add_argument('--CODEC', type=str, help='Codec of the recording.')
+parser.add_argument('--FRAMERATE', type=float, help='Framerate of the recording.')
 
 args = parser.parse_args()
 framerate = args.FRAMERATE
