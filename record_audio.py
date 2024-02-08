@@ -7,13 +7,13 @@ import requests, webbrowser
 import argparse
 
 parser = argparse.ArgumentParser(description='Records audio from the computer.')
-parser.add_argument('-DEVICE', type=int, help='Index of the input device.')
-parser.add_argument('-RECORDING_SECONDS', type=int, help='Index of the input device.')
-parser.add_argument('-LOCATION', type=str, help='Index of the input device.')
-parser.add_argument('-CHANNELS', type=int, help='Channel count of the input device')
-parser.add_argument('-RATE', type=int, help='Rate of the recording')
-parser.add_argument('-FORMAT', type=str, help='Format of the recording')
-parser.add_argument('-CHUNK', type=int, help='Size of the chunks')
+parser.add_argument('--DEVICE', type=int, help='Index of the input device.')
+parser.add_argument('--RECORDING_SECONDS', type=int, help='Index of the input device.')
+parser.add_argument('--LOCATION', type=str, help='Index of the input device.')
+parser.add_argument('--CHANNELS', type=int, help='Channel count of the input device')
+parser.add_argument('--RATE', type=int, help='Rate of the recording')
+parser.add_argument('--FORMAT', type=str, help='Format of the recording')
+parser.add_argument('--CHUNK', type=int, help='Size of the chunks')
 
 args = parser.parse_args()
 
