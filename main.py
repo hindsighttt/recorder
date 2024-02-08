@@ -1,23 +1,33 @@
-
 import pyautogui, cv2, numpy as np
 from screeninfo import get_monitors
-import soundfile as sf
-import sounddevice as sd
+import pyaudio
+import wave
 import sys, os
 import datetime, time
 import requests, webbrowser
 import threading
+import keyboard
+
+## Uncomment the line below if you want to list the audio devices ##
+# audio = pyaudio.PyAudio()
+# info = audio.get_host_api_info_by_index(0)
+# numdevices = info.get('deviceCount')
+# for i in range(0, numdevices):
+#     if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+#         print("Input Device id ", i, " - ", audio.get_device_info_by_host_api_device_index(0, i).get('name'))
+# audio.terminate()
+
 
 ## configuration start ##
 
 # time settings
-start_hour = 11
-start_minute = 11
-start_seconds = 1
+start_hour = 14
+start_minute = 13
+start_seconds = 30
 
-end_hour = 11
-end_minute = 11
-end_seconds = 5
+end_hour = 14
+end_minute = 13
+end_seconds = 50
 
 # output settings
 audio_output_location = f"output_audio\\{str(datetime.datetime.now().date().day)}_{str(datetime.datetime.now().date().month)}_{str(datetime.datetime.now().date().year)}.wav"
@@ -34,57 +44,60 @@ resolution = (x, y)
 codec = cv2.VideoWriter_fourcc(*"XVID")
 
 # audio settings
-samplerate = 44100
-duration = ((end_hour * 60 * 60) + (end_minute * 60) + end_seconds) - ((start_hour * 60 * 60) + (start_minute * 60) + start_seconds)
-print(duration)
-exit()
-print(sd.query_devices())
-loopback_device = 1
+FORMAT = pyaudio.paInt16
+CHANNELS = 2
+RATE = 44100
+CHUNK = 1024
+RECORD_SECONDS = ((end_hour * 60 * 60) + (end_minute * 60) + end_seconds) - ((start_hour * 60 * 60) + (start_minute * 60) + start_seconds)
+WAVE_OUTPUT_FILENAME = audio_output_location
+INPUT_DEVICE = 1
 
 # configuration end ##
 
 def get_time():
     current_time = datetime.datetime.now().time()
 
-    # Retrieve hours, minutes, and seconds
     hours = int(current_time.hour)
     minutes = int(current_time.minute)
     seconds = int(current_time.second)
 
-    # Print the values
-    print("Hours:", hours)
-    print("Minutes:", minutes)
-    print("Seconds:", seconds)
-
     return hours, minutes, seconds
 
-out = cv2.VideoWriter(video_output_location, codec, framerate, resolution)
-cv2.namedWindow("Live", cv2.WINDOW_NORMAL) # debug
-cv2.resizeWindow("Live", 480, 270) # debug
-
-
-def record_screen():
-    while True:
-
-        img = pyautogui.screenshot()
-        frame = np.array(img)
+def start_recording():
     
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        out.write(frame)
-        
-        cv2.imshow('Live', frame) # debug
-        
-        if cv2.waitKey(1) == ord('a'):
+    print('Starting the audio recorder...')
+    print('SCREEN RECORDER NULL.')
+    os.system(f'python record_audio.py -DEVICE {INPUT_DEVICE} -RECORDING_SECONDS {RECORD_SECONDS} -LOCATION {WAVE_OUTPUT_FILENAME} -CHANNELS {CHANNELS} -RATE {RATE} -FORMAT {FORMAT} -CHUNK {CHUNK}')
+    time.sleep(3)
+
+    os.system('cls')
+    print('AUDIO RECORDER OK.')
+    print('Starting the screen recorder...')
+    os.system(f'python record_screen.py -LOCATION {video_output_location} -RECORDING_SECONDS {RECORD_SECONDS} -X {x} -Y {y} -CODEC {codec} -FRAMERATE {framerate}')
+    time.sleep(3)
+
+    os.system('cls')
+    print('AUDIO RECORDER OK.')
+    print('SCREEN RECORDER OK.')
+
+def check_time():
+    start = False
+    while start != True:
+        hours, minutes, seconds = get_time()
+        if hours < start_hour and minutes < start_minute and seconds < start_seconds:
+            print(f'{hours}:{minutes}:{seconds}: Waiting for start time...')
+            start = False
+        elif hours >= start_hour and minutes >= start_minute and seconds >= start_seconds:
+            start = True
             break
-    out.release()
-    cv2.destroyAllWindows()
+def combine_video(vidname, audname, outname, fps=framerate):
+    import moviepy.editor as mpe
+    my_clip = mpe.VideoFileClip(vidname)
+    audio_background = mpe.AudioFileClip(audname)
+    final_clip = my_clip.set_audio(audio_background)
+    final_clip.write_videofile(outname,fps=fps)
 
-def record_audio():
-    print(f"Recording for {duration} seconds...")
-    myrecording = sd.rec(int(duration * samplerate), samplerate=samplerate,channels=2, device=loopback_device)
-    sd.wait()  # Wait until recording is finished
-
-    # Save the recording
-    sf.write(audio_output_location, myrecording, samplerate)
-
-record_audio()
+if __name__ == "__main__":
+    start_recording()
+    time.sleep(RECORD_SECONDS)
+    combine_video(video_output_location, audio_output_location, f"output\\{str(datetime.datetime.now().date().day)}_{str(datetime.datetime.now().date().month)}_{str(datetime.datetime.now().date().year)}.mp4")
